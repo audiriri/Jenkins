@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        
+        stage('Unit and Integration Tests') {
+            steps {
+                sh 'mvn test'
+                sh 'mvn integration test'
+            }
+        }
+        
+        stage('Code Analysis') {
+            steps {
+                sh 'sonar-scanner'
+            }
+        }
+        
+        stage('Security Scan') {
+            steps {
+                sh 'owasp-zap -target http://your-app-url'
+            }
+        }
+        
+        stage('Deploy to Staging') {
+            steps {
+                sh 'aws s3 cp ./target/app.jar s3://your-staging-bucket'
+            }
+        }
+        
+        stage('Integration Tests on Staging') {
+            steps {
+                sh 'mvn integration-test -Denv=staging'
+            }
+        }
+        
+        stage('Deploy to Production') {
+            steps {
+                sh 'aws s3 cp ./target/app.jar s3://your-production-bucket'
+            }
+        }
+    }
+    
+    post {
+        always {
+            emailext(
+            subject: "Pipeline ${currentBuild.result}: ${env.JOB_NAME}",
+                body: "Pipeline ${currentBuild.result}: ${env.JOB_NAME}\n\nStatus: ${currentBuild.result}\n\nLogs are attached.",
+                to: "thanzinhninthet58@gmail.com", 
+                attachLog: true        }
+    }
+}
