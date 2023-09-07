@@ -1,57 +1,76 @@
-pipeline {
-    agent any
-    
-    stages {
-        stage('Build') {
+stages {
+        stage("Build") {
             steps {
                 sh 'mvn clean package'
+                echo  'Building project to compile and package using Maven'
             }
         }
-        
-        stage('Unit and Integration Tests') {
+
+        stage("Unit and Integration Tests") {
             steps {
                 sh 'mvn test'
-                sh 'mvn integration test'
+                sh 'your_integration_test_command'
+                echo 'JUnit test for code function'
+                echo 'Integration Test working together'
+            }
+            post{ 
+                    success{
+                        mail to: "thanzinhninthet58@gmail.com",
+                        subject: "Success: JUnit and Integration test successful.",
+                        body: "Stage is working."
+                    }
+                    failure{
+                        mail to: "thanzinhninthet58@gmail.com",
+                        subject: "Unsuccess: JUnit and Integration test failure.",
+                        body: "Stage is not working. Please try to test again."
+                    }
+                }
+        }
+
+        stage("Code Analysis") {
+            steps {
+                sh 'mvn sonar:sonar'
+                 echo 'Performing code analysis using SonarQube'
             }
         }
-        
-        stage('Code Analysis') {
+
+        stage("Security Scan") {
             steps {
-                sh 'sonar-scanner'
+                sh 'your_security_scan_command'
+               echo 'Performing security scan using SonarQube'
+            }
+             post{ 
+                    success{
+                        mail to: "thanzinhninthet58@gmail.com",
+                        subject: "Success: Security scans successful.",
+                        body: "Scan is secure."
+                    }
+                    failure{
+                        mail to: "thanzinhninthet58@gmail.com",
+                        subject: "Unsuccess: Security scans failure.",
+                        body: "Scan is not secure. Please try to protect application."
+                    }
+                }
+        }
+
+        stage("Deploy to Staging") {
+            steps {
+                sh 'aws s3 cp your-app.jar s3://staging-bucket/'
+                 echo 'Deploy to staging sever AWS EC2 s3://staging-bucket/'
             }
         }
-        
-        stage('Security Scan') {
+
+        stage("Integration Tests on Staging") {
             steps {
-                sh 'owasp-zap -target http://your-app-url'
+                sh 'your_integration_test_command_on_staging'
+                echo 'Run Integration Tests on Staging environment'
             }
         }
-        
-        stage('Deploy to Staging') {
+
+        stage("Deploy to Production") {
             steps {
-                sh 'aws s3 cp ./target/app.jar s3://your-staging-bucket'
-            }
-        }
-        
-        stage('Integration Tests on Staging') {
-            steps {
-                sh 'mvn integration-test -Denv=staging'
-            }
-        }
-        
-        stage('Deploy to Production') {
-            steps {
-                sh 'aws s3 cp ./target/app.jar s3://your-production-bucket'
+                sh 'aws s3 cp your-app.jar s3://production-bucket/'
+                echo'Deploy to Production server AWS EC2'
             }
         }
     }
-    
-    post {
-        always {
-            emailext(
-            subject: "Pipeline ${currentBuild.result}: ${env.JOB_NAME}",
-                body: "Pipeline ${currentBuild.result}: ${env.JOB_NAME}\n\nStatus: ${currentBuild.result}\n\nLogs are attached.",
-                to: "thanzinhninthet58@gmail.com", 
-                attachLog: true        }
-    }
-}
