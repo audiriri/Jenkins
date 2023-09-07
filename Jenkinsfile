@@ -4,9 +4,11 @@ pipeline{
 stages {
         stage("Build") {
             steps {
+                script{
                 def mvnHome = tool name: 'Maven 3.8.2', type: 'maven'
                 sh "${mvnHome}/bin/mvn clean package"
                 echo  'Building project to compile and package using Maven'
+                }
             }
         }
 
