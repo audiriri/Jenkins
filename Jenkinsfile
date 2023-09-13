@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage("Build") {
             steps {
-                echo  'Building project to compile and package'
+                echo  'Building project to compile and package using Maven' //comment
             }
         }
 
