@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers{
+        webhook()
+    }
+
     stages {
         stage("Build") {
             steps {
