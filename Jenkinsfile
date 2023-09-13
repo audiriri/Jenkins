@@ -82,4 +82,13 @@ post {
             echo 'Deployment failed!'
         }
     }
-}
+
+    scm {
+        git {
+            remote {
+                name('origin')
+                url('https://github.com/audiriri/https://github.com/audiriri/Jenkins.git')
+            }
+            branches('*/main') // Specify the branch you want to trigger on
+        }
+    }}
